@@ -10,6 +10,7 @@ import logger from './lib/logger.js';
 
 import parseArgs from './lib/parse-args.js';
 import JoplinAPIClient from './lib/joplin-api-client.js';
+import AuthManager from './lib/auth-manager.js';
 import { 
   ListNotebooks, 
   SearchNotes, 
@@ -26,28 +27,35 @@ import {
   GetFolder
 } from './lib/tools/index.js';
 
+import { ClipUrlTool } from './lib/tools/clip-url.js';
+
 // Parse command line arguments
 parseArgs();
 
-// Check for required environment variables
-const requiredEnvVars = ['JOPLIN_PORT', 'JOPLIN_TOKEN'];
-for (const envVar of requiredEnvVars) {
-  if (!process.env[envVar]) {
-    console.error(`Error: ${envVar} environment variable is required`);
-    process.exit(1);
-  }
+// Initialize Auth Manager
+const authManager = new AuthManager({
+  port: 3000, // Default auth server port
+  joplinPort: process.env.JOPLIN_PORT || 41184
+});
+
+// Start the auth server (it will be available if needed)
+authManager.start();
+
+// Check for required environment variables (only JOPLIN_PORT is strictly required now)
+if (!process.env.JOPLIN_PORT && !authManager.joplinPort) {
+  logger.warn('JOPLIN_PORT is not set. Defaulting to 41184.');
 }
 
 // Create the Joplin API client
 const apiClient = new JoplinAPIClient({
-  port: process.env.JOPLIN_PORT,
-  token: process.env.JOPLIN_TOKEN
+  port: process.env.JOPLIN_PORT || authManager.joplinPort,
+  authManager: authManager
 });
 
 // Create the MCP server
 const server = new McpServer({
   name: 'joplin-mcp-server',
-  version: '1.0.0'
+  version: '1.1.0'
 });
 
 // Register the list_notebooks tool
@@ -269,6 +277,26 @@ server.tool(
   },
   {
     description: 'Get detailed information about a specific folder including contents summary and recent notes'
+  }
+);
+
+// Register the clip_url tool
+server.tool(
+  'clip_url',
+  { 
+    url: z.string(),
+    notebook_id: z.string().optional(),
+    tags: z.string().optional(),
+    title: z.string().optional()
+  },
+  async ({ url, notebook_id, tags, title }) => {
+    const result = await new ClipUrlTool(apiClient).call(url, notebook_id, tags, title);
+    return {
+      content: [{ type: 'text', text: result }]
+    };
+  },
+  {
+    description: 'Fetch a URL, convert its content to Markdown using Joplin\'s internal clipper, and save it as a new note'
   }
 );
 
