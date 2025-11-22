@@ -39,8 +39,7 @@ const authManager = new AuthManager({
   configPath: envFilePath
 });
 
-// Start the auth server (it will be available if needed)
-authManager.start();
+// Auth server will start automatically when authentication fails
 
 // Check for required environment variables (only JOPLIN_PORT is strictly required now)
 if (!process.env.JOPLIN_PORT && !authManager.joplinPort) {
