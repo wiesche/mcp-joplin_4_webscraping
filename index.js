@@ -30,12 +30,13 @@ import {
 import { ClipUrlTool } from './lib/tools/clip-url.js';
 
 // Parse command line arguments
-parseArgs();
+const { envFilePath } = parseArgs();
 
 // Initialize Auth Manager
 const authManager = new AuthManager({
   port: 3000, // Default auth server port
-  joplinPort: process.env.JOPLIN_PORT || 41184
+  joplinPort: process.env.JOPLIN_PORT || 41184,
+  configPath: envFilePath
 });
 
 // Start the auth server (it will be available if needed)
@@ -280,9 +281,9 @@ server.tool(
   }
 );
 
-// Register the clip_url tool
+// Register the clip_from_url tool
 server.tool(
-  'clip_url',
+  'clip_from_url',
   { 
     url: z.string(),
     notebook_id: z.string().optional(),
@@ -296,7 +297,7 @@ server.tool(
     };
   },
   {
-    description: 'Fetch a URL, convert its content to Markdown using Joplin\'s internal clipper, and save it as a new note'
+    description: 'Fetch a URL, convert its content to Markdown using Joplin\'s internal web clipper, and save it as a new note'
   }
 );
 
