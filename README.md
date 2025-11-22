@@ -20,6 +20,8 @@ JOPLIN_TOKEN=your_joplin_token
 You can find your Joplin token in the Joplin desktop app under:
 Tools > Options > Web Clipper
 
+**Lazy Authentication**: The server can now start without `JOPLIN_TOKEN` explicitly set. If a tool requiring authentication is used without a token, the server will provide a link to a local web interface (default: `http://localhost:3000/auth`) where you can securely input and save your token.
+
 ## Usage
 
 Start the server:
@@ -257,6 +259,134 @@ Successfully retrieved: 3
 ```
 
 > **Tip**: When you search for notes or view a notebook, you'll see a suggestion for using `read_multinote` with the exact IDs of the notes found. This makes it easy to read multiple related notes at once.
+
+### create_note
+
+Create a new note with optional Markdown content, notebook assignment, and todo properties.
+
+**Parameters:**
+- `title`: Title of the note
+- `body` (optional): Markdown content
+- `parent_id` (optional): ID of the parent notebook
+- `is_todo` (optional): Boolean, true if it's a todo
+- `todo_due` (optional): Timestamp for due date
+
+```
+# Example usage:
+create_note title="New Task" is_todo=true body="# Details"
+```
+
+### update_note
+
+Update an existing note's title, content, notebook, or todo properties.
+
+**Parameters:**
+- `note_id`: ID of the note to update
+- `title` (optional)
+- `body` (optional)
+- `parent_id` (optional)
+- `is_todo` (optional)
+- `todo_completed` (optional)
+- `todo_due` (optional)
+
+```
+# Example usage:
+update_note note_id="abc123" title="Updated Task" todo_completed=true
+```
+
+### delete_note
+
+Move a note to trash (soft delete). The note can be restored from Joplin's trash.
+
+**Parameters:**
+- `note_id`: ID of the note to delete
+
+```
+# Example usage:
+delete_note note_id="abc123"
+```
+
+### create_folder
+
+Create a new folder (notebook) with optional parent folder assignment.
+
+**Parameters:**
+- `title`: Title of the folder
+- `parent_id` (optional): ID of the parent folder
+
+```
+# Example usage:
+create_folder title="My Project"
+```
+
+### update_folder
+
+Update a folder's title or move it to a different parent folder with circular reference prevention.
+
+**Parameters:**
+- `folder_id`: ID of the folder to update
+- `title` (optional)
+- `parent_id` (optional)
+
+```
+# Example usage:
+update_folder folder_id="xyz789" title="Renamed Project"
+```
+
+### delete_folder
+
+Move a folder and all its contents to trash (soft delete). Can be restored from Joplin's trash.
+
+**Parameters:**
+- `folder_id`: ID of the folder to delete
+
+```
+# Example usage:
+delete_folder folder_id="xyz789"
+```
+
+### get_all_notes
+
+Get all notes with optional folder filtering, pagination, and sorting. Supports todo status display.
+
+**Parameters:**
+- `folder_id` (optional)
+- `page` (optional)
+- `limit` (optional)
+- `order_by` (optional)
+- `order_dir` (optional)
+
+```
+# Example usage:
+get_all_notes folder_id="xyz789" limit=20
+```
+
+### get_folder
+
+Get detailed information about a specific folder including contents summary and recent notes.
+
+**Parameters:**
+- `folder_id`: ID of the folder
+
+```
+# Example usage:
+get_folder folder_id="xyz789"
+```
+
+### clip_from_url
+
+Fetch a URL, convert its content to Markdown using Joplin's internal clipper, and save it as a new note.
+
+**Parameters:**
+- `url`: The URL to clip
+- `notebook_id` (optional): Destination notebook ID
+- `tags` (optional): Comma-separated tags
+- `title` (optional): Note title (will extract from page if omitted)
+
+```
+# Example usage:
+clip_from_url url="https://joplinapp.org" tags="joplin,research"
+```
 
 ## Development
 
