@@ -10,7 +10,6 @@ import logger from './lib/logger.js';
 
 import parseArgs from './lib/parse-args.js';
 import JoplinAPIClient from './lib/joplin-api-client.js';
-import AuthManager from './lib/auth-manager.js';
 import { 
   ListNotebooks, 
   SearchNotes, 
@@ -30,26 +29,21 @@ import {
 import { ClipUrlTool } from './lib/tools/clip-url.js';
 
 // Parse command line arguments
-const { envFilePath } = parseArgs();
+parseArgs();
 
-// Initialize Auth Manager
-const authManager = new AuthManager({
-  port: 3000, // Default auth server port
-  joplinPort: process.env.JOPLIN_PORT || 41184,
-  configPath: envFilePath
-});
+// Check for required environment variables
+if (!process.env.JOPLIN_TOKEN) {
+  logger.warn('JOPLIN_TOKEN is not set. Please set it in your .env file. Tools will fail until token is configured.');
+}
 
-// Auth server will start automatically when authentication fails
-
-// Check for required environment variables (only JOPLIN_PORT is strictly required now)
-if (!process.env.JOPLIN_PORT && !authManager.joplinPort) {
+if (!process.env.JOPLIN_PORT) {
   logger.warn('JOPLIN_PORT is not set. Defaulting to 41184.');
 }
 
 // Create the Joplin API client
 const apiClient = new JoplinAPIClient({
-  port: process.env.JOPLIN_PORT || authManager.joplinPort,
-  authManager: authManager
+  port: process.env.JOPLIN_PORT || 41184,
+  token: process.env.JOPLIN_TOKEN
 });
 
 // Create the MCP server

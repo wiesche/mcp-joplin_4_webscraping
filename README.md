@@ -20,8 +20,6 @@ JOPLIN_TOKEN=your_joplin_token
 You can find your Joplin token in the Joplin desktop app under:
 Tools > Options > Web Clipper
 
-**Lazy Authentication**: The server can now start without `JOPLIN_TOKEN` explicitly set. If a tool requiring authentication is used without a token, the server will provide a link to a local web interface (default: `http://localhost:3000/auth`) where you can securely input and save your token.
-
 ## Usage
 
 Start the server:
